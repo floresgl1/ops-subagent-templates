@@ -41,10 +41,12 @@ A GitHub Actions workflow triggers the triage on a cron schedule (or manual disp
 - [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) installed, or a Claude API key
 - Python 3.8+
 
-### 1. Clone the template into your project
+### 1. Copy the template files into your project
+
+Unzip the download and copy the template files into your project:
 
 ```bash
-git clone https://github.com/your-username/ops-subagent-templates.git
+unzip ops-subagent-templates.zip
 cp -r ops-subagent-templates/{triage-config.yaml,health-snapshot.py,.claude,.github} your-project/
 ```
 
