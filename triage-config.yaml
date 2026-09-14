@@ -1,0 +1,81 @@
+# =============================================================================
+# Triage Configuration
+# =============================================================================
+#
+# This file is the single source of truth for the daily-triage sub-agent.
+# Edit the sections below to match your system — the sub-agent and health
+# script both read from this file.
+#
+# No code changes needed. Just describe your system's expected behavior here.
+# =============================================================================
+
+
+# -----------------------------------------------------------------------------
+# Timeline
+# -----------------------------------------------------------------------------
+# Ordered list of events your system should complete each active day.
+# The sub-agent uses this to decide whether your pipeline is on track,
+# behind schedule, or failed.
+#
+# Fields:
+#   name           - Human-readable label for this step
+#   expected_time  - When this step should finish (use UTC)
+#   check          - What to verify. The health script maps this to a real
+#                    check; the sub-agent uses it for reasoning context.
+#
+# Example: a pipeline that refreshes data at noon, runs a model at 3pm,
+# and writes a report at 5pm.
+# -----------------------------------------------------------------------------
+
+timeline:
+  - name: "Data refresh"
+    expected_time: "12:00 UTC"
+    check: "output file exists"
+
+  - name: "Model run"
+    expected_time: "15:00 UTC"
+    check: "exit code 0"
+
+  - name: "Report generation"
+    expected_time: "17:00 UTC"
+    check: "output file exists"
+
+
+# -----------------------------------------------------------------------------
+# Invariants
+# -----------------------------------------------------------------------------
+# Conditions that must hold when the system is healthy. These are cross-checks
+# that catch subtle failures the individual timeline checks might miss.
+#
+# Fields:
+#   name  - Human-readable label for this invariant
+#   rule  - Plain-English description of the condition. The sub-agent uses
+#           this to reason about the health-snapshot output. Be specific —
+#           name the files, flags, or values involved.
+#
+# Example: a trading pipeline where a run-guard stamp and output rows
+# should always appear together.
+# -----------------------------------------------------------------------------
+
+invariants:
+  - name: "Pipeline completed today"
+    rule: "run guard stamped AND output rows > 0"
+
+  - name: "No stale data"
+    rule: "latest output file modified today"
+
+
+# -----------------------------------------------------------------------------
+# Notification
+# -----------------------------------------------------------------------------
+# Where the triage verdict gets posted after each run.
+#
+# webhook_url  - Discord, Slack incoming webhook, or any endpoint that
+#                accepts a POST with a JSON body.
+# channel      - Display name for the channel (used in the verdict message,
+#                not for routing — the webhook URL determines the destination).
+# -----------------------------------------------------------------------------
+
+notification:
+  webhook_url: "https://discord.com/api/webhooks/YOUR_WEBHOOK_HERE"
+  channel: "#ops-alerts"

@@ -1,0 +1,92 @@
+# =============================================================================
+# Daily Triage Workflow
+# =============================================================================
+#
+# Runs the daily-triage sub-agent on a cron schedule (or manual dispatch).
+# The agent runs the health-snapshot script, reasons about the results,
+# and produces a HEALTHY / DEGRADED / FAILED / NOT-APPLICABLE verdict.
+# The verdict is posted to the webhook URL in triage-config.yaml.
+#
+# Prerequisites:
+#   - ANTHROPIC_API_KEY repository secret (for the Claude Code CLI)
+#
+# To change the schedule, edit the cron expression below.
+# To run manually, use the "Run workflow" button in the Actions tab.
+# =============================================================================
+
+name: Daily Triage
+
+on:
+  schedule:
+    - cron: '30 20 * * *'  # Daily at 20:30 UTC — change to your preferred time
+  workflow_dispatch:        # Manual trigger always available
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Run daily-triage agent
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          claude --agent daily-triage --output-format json > triage-output.json 2>&1 || true
+
+      - name: Extract verdict
+        id: verdict
+        run: |
+          # Extract the verdict line from the agent output
+          VERDICT=$(grep -oP 'VERDICT:\s*\K\S+' triage-output.json || echo "UNKNOWN")
+          SUMMARY=$(grep -oP 'SUMMARY:\s*\K.+' triage-output.json || echo "Could not extract summary from agent output.")
+
+          echo "verdict=$VERDICT" >> "$GITHUB_OUTPUT"
+          echo "summary=$SUMMARY" >> "$GITHUB_OUTPUT"
+
+          # Print full output to workflow logs for debugging
+          echo "--- Full agent output ---"
+          cat triage-output.json
+
+      - name: Read webhook URL from config
+        id: config
+        run: |
+          WEBHOOK_URL=$(python -c "
+          import yaml
+          with open('triage-config.yaml') as f:
+              config = yaml.safe_load(f)
+          print(config.get('notification', {}).get('webhook_url', ''))
+          ")
+          echo "webhook_url=$WEBHOOK_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Post verdict to webhook
+        if: steps.config.outputs.webhook_url != '' && !contains(steps.config.outputs.webhook_url, 'YOUR_WEBHOOK_HERE')
+        run: |
+          VERDICT="${{ steps.verdict.outputs.verdict }}"
+          SUMMARY="${{ steps.verdict.outputs.summary }}"
+
+          # Pick emoji by verdict
+          case "$VERDICT" in
+            HEALTHY)        EMOJI="🟢" ;;
+            DEGRADED)       EMOJI="🟡" ;;
+            FAILED)         EMOJI="🔴" ;;
+            NOT-APPLICABLE) EMOJI="⚪" ;;
+            *)              EMOJI="❓" ;;
+          esac
+
+          # Post to webhook (works with Discord and Slack incoming webhooks)
+          curl -s -X POST "${{ steps.config.outputs.webhook_url }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"content\": \"$EMOJI **$VERDICT** — $SUMMARY\"}"
