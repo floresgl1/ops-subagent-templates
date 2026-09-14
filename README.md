@@ -47,6 +47,7 @@ Unzip the download and copy the template files into your project:
 
 ```bash
 unzip ops-subagent-templates.zip
+pip install -r ops-subagent-templates/requirements.txt
 cp -r ops-subagent-templates/{triage-config.yaml,health-snapshot.py,.claude,.github} your-project/
 ```
 
