@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>AI Ops Triage Template</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;700&family=Fira+Mono:wght@400;500&display=swap">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+
+  :root {
+    --bg: #f5f3ee;
+    --fg: #1a1917;
+    --fg2: #6b6860;
+    --fg3: #a8a69e;
+    --bdr: #d8d4cc;
+    --btn-bg: #1a1917;
+    --btn-fg: #f5f3ee;
+    --code-bg: #e8e5de;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e0e0b;
+      --fg: #e3e1dc;
+      --fg2: #8a877f;
+      --fg3: #5a5850;
+      --bdr: #2c2c27;
+      --btn-bg: #e3e1dc;
+      --btn-fg: #0e0e0b;
+      --code-bg: #1e1e1a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e0e0b;
+    --fg: #e3e1dc;
+    --fg2: #8a877f;
+    --fg3: #5a5850;
+    --bdr: #2c2c27;
+    --btn-bg: #e3e1dc;
+    --btn-fg: #0e0e0b;
+    --code-bg: #1e1e1a;
+  }
+
+  html { scroll-behavior: smooth }
+  body {
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible { outline: 2px solid var(--fg); outline-offset: 2px }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto } }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+
+  /* Layout */
+  .col {
+    max-width: 640px;
+    margin: 0 auto;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  /* Hero */
+  .hero { padding-block: 64px 0 }
+  .hero h1 {
+    font-family: 'Bitter', Georgia, 'Times New Roman', serif;
+    font-size: clamp(28px, 5.5vw, 42px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+  .hero-sub {
+    font-size: clamp(15px, 2vw, 17px);
+    color: var(--fg2);
+    max-width: 540px;
+    line-height: 1.65;
+    margin-bottom: 28px;
+  }
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+  .btn {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 10px 28px;
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+    border: none;
+    cursor: pointer;
+    transition: opacity .15s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn:hover { opacity: .8 }
+  .hero-note {
+    font-size: 13px;
+    color: var(--fg3);
+  }
+
+  /* Terminal — always dark */
+  .term {
+    background: #0c0c0a;
+    border: 1px solid #2a2a25;
+    overflow: hidden;
+  }
+  .term pre {
+    padding: 20px 24px;
+    font-family: 'Fira Mono', 'Consolas', monospace;
+    font-size: 12.5px;
+    line-height: 1.85;
+    color: rgba(255,255,255,.55);
+    white-space: pre-wrap;
+    overflow-x: auto;
+    margin: 0;
+  }
+  .tok { color: rgba(255,255,255,.28) }
+  .t-ok { color: #4ade80 }
+  .t-lbl { color: rgba(255,255,255,.48) }
+  .t-v { color: #4ade80; font-weight: 500 }
+
+  /* Sections */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--bdr);
+    margin: 0;
+  }
+  .sect { padding-block: 56px }
+  .sect h2 {
+    font-family: 'Bitter', Georgia, 'Times New Roman', serif;
+    font-size: clamp(20px, 3.5vw, 26px);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+    margin-bottom: 16px;
+    text-wrap: balance;
+  }
+  .sect p {
+    font-size: 16px;
+    color: var(--fg2);
+    line-height: 1.7;
+    max-width: 560px;
+  }
+  .sect p + p { margin-top: 12px }
+
+  code {
+    font-family: 'Fira Mono', monospace;
+    font-size: 0.88em;
+    color: var(--fg);
+    background: var(--code-bg);
+    padding: 1px 5px;
+  }
+
+  /* Read-only note */
+  .ro {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--bdr);
+    font-size: 14.5px;
+  }
+
+  /* File list */
+  .flist { margin-top: 8px }
+  .fitem {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--bdr);
+  }
+  .fitem:last-child { border-bottom: none }
+  .fname {
+    font-family: 'Fira Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg);
+    display: block;
+    margin-bottom: 2px;
+  }
+  .fdesc { font-size: 14px; color: var(--fg2) }
+
+  /* Bottom CTA */
+  .cta {
+    text-align: center;
+    padding-block: 56px 72px;
+  }
+  .cta h2 { margin-bottom: 8px }
+  .cta-desc {
+    font-size: 15px;
+    color: var(--fg2);
+    margin: 0 auto 28px;
+    max-width: 480px;
+  }
+  .reviews {
+    font-size: 13px;
+    color: var(--fg3);
+    margin-bottom: 24px;
+  }
+  .pbox {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid var(--bdr);
+    padding: 28px 36px;
+  }
+  .pbox-label { font-size: 14px; color: var(--fg2); font-weight: 500 }
+  .pbox-row { display: flex; align-items: center; gap: 4px }
+  .pbox-dollar { font-size: 24px; font-weight: 700; color: var(--fg) }
+  .pbox-input {
+    width: 68px;
+    font-family: system-ui, sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--bdr);
+    padding: 6px 8px;
+    text-align: center;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .pbox-input:focus { border-color: var(--fg) }
+  .pbox-input::-webkit-inner-spin-button,
+  .pbox-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0 }
+  .pbox-input { -moz-appearance: textfield }
+  .pbox-hint { font-size: 12px; color: var(--fg3) }
+  .btn-buy {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 10px 0;
+    width: 100%;
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+    border: none;
+    cursor: pointer;
+    transition: opacity .15s;
+  }
+  .btn-buy:hover { opacity: .8 }
+  .pbox-note { font-size: 11px; color: var(--fg3) }
+
+  /* Footer */
+  .foot {
+    text-align: center;
+    padding: 20px 24px;
+    font-size: 12px;
+    color: var(--fg3);
+    border-top: 1px solid var(--bdr);
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="col">
+    <h1 data-gumroad-field="name">AI Ops Triage Template</h1>
+    <p class="hero-sub">A config-driven template that adds automated daily triage to your production system. A read-only AI sub-agent runs your health checks, reasons about the results, and tells you if something broke&mdash;without ever touching your system.</p>
+    <div class="hero-actions">
+      <button class="btn" data-gumroad-action="buy">I want this</button>
+      <span class="hero-note">Name a fair price &middot; Suggested $19</span>
+    </div>
+  </div>
+  <div class="col">
+    <div class="term" role="img" aria-label="Example triage output showing a healthy system">
+      <pre><span class="tok">=== Output Files ===</span>
+<span class="t-ok">[OK]</span> <span class="t-lbl">Data refresh</span>
+<span class="t-ok">[OK]</span> <span class="t-lbl">Report generation</span>
+
+<span class="tok">=== Exit Codes ===</span>
+<span class="t-ok">[OK]</span> <span class="t-lbl">Model run: exited 0</span>
+
+<span class="tok">=== Invariants ===</span>
+<span class="t-ok">[OK]</span> <span class="t-lbl">Pipeline completed</span>
+
+<span class="t-v">VERDICT: HEALTHY</span></pre>
+    </div>
+  </div>
+</header>
+
+<main class="col">
+  <hr class="divider">
+  <section class="sect">
+    <h2>Your scheduled job ran last night. Did it actually work?</h2>
+    <p>Scheduled systems fail silently. You want a daily sanity check without building a full monitoring stack.</p>
+    <p>This template gives you a two-layer diagnostic pattern: a health-snapshot script gathers the facts, then a Claude sub-agent reads the results, reasons about what happened, and delivers a structured verdict&mdash;HEALTHY, DEGRADED, or FAILED.</p>
+  </section>
+
+  <hr class="divider">
+  <section class="sect">
+    <h2>Two-layer diagnostic pattern</h2>
+    <p><code>health-snapshot.py</code> gathers facts from your system: output file existence, task exit codes, cross-check invariants. It runs standalone with no AI dependencies.</p>
+    <p>The <code>daily-triage</code> agent reads the health output, reasons about what happened, diagnoses issues, and posts a verdict to your webhook.</p>
+    <p class="ro"><strong>Read-only by design.</strong> The sub-agent can't modify files, hit APIs, or change your system. It only reads and reports. Belt and suspenders: tool scoping plus a hard rule in the agent prompt.</p>
+  </section>
+
+  <hr class="divider">
+  <section class="sect">
+    <h2>What you get</h2>
+    <p>Seven files. Time to first triage: under 30 minutes.</p>
+    <div class="flist">
+      <div class="fitem">
+        <span class="fname">triage-config.yaml</span>
+        <span class="fdesc">Single config for your timeline, invariants, and notification settings</span>
+      </div>
+      <div class="fitem">
+        <span class="fname">health-snapshot.py</span>
+        <span class="fdesc">Skeleton health script with three example checks you customize</span>
+      </div>
+      <div class="fitem">
+        <span class="fname">.claude/agents/daily-triage.md</span>
+        <span class="fdesc">Sub-agent definition with read-only tool scoping and structured verdicts</span>
+      </div>
+      <div class="fitem">
+        <span class="fname">.github/workflows/triage.yml</span>
+        <span class="fdesc">GitHub Actions workflow with cron scheduling and webhook notification</span>
+      </div>
+      <div class="fitem">
+        <span class="fname">tests/</span>
+        <span class="fdesc">25 pytest tests covering health script, config loading, and workflow validation</span>
+      </div>
+      <div class="fitem">
+        <span class="fname">demo.sh</span>
+        <span class="fdesc">Interactive demo showing three scenarios: healthy, failing, and mixed</span>
+      </div>
+      <div class="fitem">
+        <span class="fname">README.md</span>
+        <span class="fdesc">Quick start guide, full configuration reference, and FAQ</span>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+  <section class="sect cta">
+    <h2>Start triaging today</h2>
+    <p class="cta-desc">This isn't a prototype&mdash;it's extracted from production systems where this exact two-layer pattern has been running daily. Built for solo developers and small teams running data pipelines, ML training jobs, ETL processes, and batch reports.</p>
+    <div class="reviews">
+      <span data-gumroad-field="rating">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+      &middot;
+      <span data-gumroad-field="review-count">Be the first to review</span>
+    </div>
+    <div class="pbox">
+      <span class="pbox-label">Name a fair price</span>
+      <div class="pbox-row">
+        <span class="pbox-dollar">$</span>
+        <label for="gr-price" class="sr-only">Price in USD</label>
+        <input id="gr-price" class="pbox-input" type="number" min="0" step="1" value="19" placeholder="19" aria-label="Price in USD">
+      </div>
+      <span class="pbox-hint">Suggested: $19</span>
+      <button id="gr-buy" class="btn-buy" type="button">I want this</button>
+      <span class="pbox-note">Instant download &middot; ZIP file</span>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <span data-gumroad-field="name">AI Ops Triage Template</span> &middot; v1.0.0
+</footer>
+
+<script>
+  document.getElementById("gr-buy").addEventListener("click", function () {
+    var v = (document.getElementById("gr-price").value || "").trim(), params = {};
+    if (v !== "") {
+      var n = parseFloat(v);
+      if (!isNaN(n) && n >= 0) params.price = String(n);
+    }
+    parent.postMessage({ type: "gumroad:checkout", params: params }, "*");
+  });
+</script>
+
+</body>
+</html>
