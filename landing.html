@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>AI Ops Triage Template</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
@@ -49,7 +49,7 @@
 
   html { scroll-behavior: smooth }
   body {
-    font-family: 'Source Sans 3', system-ui, -apple-system, sans-serif;
+    font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
     background: var(--bg);
     color: var(--fg);
     line-height: 1.65;
@@ -91,7 +91,7 @@
 
   .badge {
     display: inline-flex; align-items: center; gap: 8px;
-    font-family: 'Source Code Pro', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px; font-weight: 600; letter-spacing: .08em;
     color: #4ade80;
     background: rgba(74,222,128,.08);
@@ -134,7 +134,7 @@
   }
   .term-body {
     padding: 16px 20px 20px;
-    font-family: 'Source Code Pro', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 12.5px; line-height: 1.85;
     color: rgba(255,255,255,.55);
     white-space: pre-wrap; overflow-x: auto;
@@ -147,7 +147,7 @@
   /* ---- Buttons ---- */
   .btn {
     display: inline-flex; align-items: center; justify-content: center;
-    font-family: 'Source Sans 3', system-ui, sans-serif;
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
     font-weight: 600; border: none; cursor: pointer;
     border-radius: 6px; text-decoration: none;
     transition: background .15s, transform .1s;
@@ -168,7 +168,7 @@
   }
   .label {
     display: block;
-    font-family: 'Source Code Pro', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px; font-weight: 600;
     letter-spacing: .1em; text-transform: uppercase;
     color: var(--acc); margin-bottom: 14px;
@@ -213,7 +213,7 @@
     background: var(--card);
   }
   .layer-name {
-    font-family: 'Source Code Pro', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 13px; font-weight: 600;
     color: var(--acc); margin-bottom: 8px;
   }
@@ -241,7 +241,7 @@
   }
   .fitem:last-child { border-bottom: none }
   .fname {
-    font-family: 'Source Code Pro', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 13px; font-weight: 600; color: var(--acc);
   }
   .fdesc { font-size: 14.5px; color: var(--fg2) }
@@ -275,7 +275,7 @@
   .pbox-dollar { font-size: 26px; font-weight: 700; color: var(--fg) }
   .pbox-input {
     width: 72px;
-    font-family: 'Source Sans 3', system-ui, sans-serif;
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
     font-size: 26px; font-weight: 700; color: var(--fg);
     background: var(--bg);
     border: 1.5px solid var(--bdr); border-radius: 6px;
@@ -314,7 +314,7 @@
       HEALTHY
     </div>
     <h1 data-gumroad-field="name">AI Ops Triage Template</h1>
-    <p class="hero-sub">A config-driven template that adds automated daily triage to your production system. A read-only sub-agent checks your health script output and delivers a verdict&mdash;without ever touching your system.</p>
+    <p class="hero-sub">A config-driven template that adds automated daily triage to your production system. A read-only AI sub-agent runs your health checks, reasons about the results, and tells you if something broke&mdash;without ever touching your system.</p>
 
     <div class="term" role="img" aria-label="Example triage output showing a healthy system verdict">
       <div class="term-bar" aria-hidden="true"><div class="term-dot"></div><div class="term-dot"></div><div class="term-dot"></div></div>
@@ -340,7 +340,7 @@
   <div class="wrap">
     <span class="label">The problem</span>
     <h2>Your scheduled job ran last night. Did it actually work?</h2>
-    <p class="desc">Scheduled systems fail silently. You scan logs, check output files, cross-reference timestamps&mdash;every morning, manually. You find out something broke when a stakeholder asks why the data is stale.</p>
+    <p class="desc">Scheduled systems fail silently. You want a daily sanity check without building a full monitoring stack. You find out something broke when a stakeholder asks why the data is stale.</p>
     <div class="pgrid">
       <div class="pcard">
         <h3><span class="dot-sm dot-red" aria-hidden="true"></span> Without triage</h3>
@@ -348,15 +348,15 @@
       </div>
       <div class="pcard">
         <h3><span class="dot-sm dot-grn" aria-hidden="true"></span> With this template</h3>
-        <p>A health script gathers the facts. A Claude sub-agent reads them, reasons about what went wrong, and delivers a verdict before you open your laptop.</p>
+        <p>A health script gathers the facts. A Claude sub-agent reads them, reasons about the results, and tells you if something broke&mdash;before you open your laptop.</p>
       </div>
     </div>
   </div>
 
   <div class="wrap">
     <span class="label">Architecture</span>
-    <h2>Two layers, one daily check</h2>
-    <p class="desc">A plain Python script gathers the facts. A Claude sub-agent reads the output and reasons about what happened. Neither layer works without the other.</p>
+    <h2>Two-layer diagnostic pattern</h2>
+    <p class="desc">A health-snapshot script gathers the facts, then a Claude sub-agent reads the results, reasons about what happened, and delivers a structured verdict&mdash;HEALTHY, DEGRADED, or FAILED.</p>
     <div class="layers">
       <div class="layer">
         <div class="layer-name">health-snapshot.py</div>
@@ -365,18 +365,18 @@
       <div class="layer-arrow" aria-hidden="true">&darr;</div>
       <div class="layer">
         <div class="layer-name">daily-triage agent</div>
-        <p>Reads the health output, digs into logs when something looks off, and produces a structured verdict: HEALTHY, DEGRADED, or FAILED.</p>
+        <p>Reads the health output, reasons about what happened, diagnoses issues, and posts a verdict to your webhook.</p>
       </div>
     </div>
     <div class="ro-note">
-      <strong>Read-only by design.</strong> The sub-agent's tools are scoped to Bash, Read, Grep, and Glob. It cannot modify files, call APIs, or change your system. Belt and suspenders: tool scoping plus a hard rule in the agent prompt.
+      <strong>Read-only by design.</strong> The sub-agent can't modify files, hit APIs, or change your system. It only reads and reports. Belt and suspenders: tool scoping plus a hard rule in the agent prompt.
     </div>
   </div>
 
   <div class="wrap">
     <span class="label">What's included</span>
     <h2>Seven files. First triage in 30 minutes.</h2>
-    <p class="desc">Unzip into your repo, edit the config, and run your first automated triage.</p>
+    <p class="desc">Unzip into your repo, edit the config, and run your first automated triage. Time to first triage: under 30 minutes.</p>
     <div class="flist">
       <div class="fitem">
         <span class="fname">triage-config.yaml</span>
@@ -411,7 +411,7 @@
 
   <section class="cta">
     <h2>Start triaging today</h2>
-    <p class="cta-desc">Wire it into your stack in an afternoon. This pattern runs daily in production.</p>
+    <p class="cta-desc">This isn't a prototype&mdash;it's extracted from production systems where this exact two-layer pattern has been running daily.</p>
     <div class="reviews">
       <span data-gumroad-field="rating">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
       &middot;
